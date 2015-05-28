@@ -7,17 +7,12 @@ Swift Alamofire Generator for [Dingle](https://github.com/Vmlweb/Dingle)
 $ npm install --save dingle-swift-alamofire
 ```
 
-## Methods
+## Dependancies
 
-  * POST
-  * GET
-  * PUT
-  * DELETE
-  * OPTIONS
-  * HEAD
-  * PATCH
-  * TRACE
-  * CONNECT
+Once the exported classes have been put into XCode you will need the following frameworks:
+
+  * [Alamofire](https://github.com/Alamofire/Alamofire)
+  * [SwiftyJSON](https://github.com/SwiftyJSON/SwiftyJSON)
 
 ## Usage
 
@@ -34,10 +29,17 @@ var dingle = require('dingle')({
 var generator = require('dingle-swift-alamofire');
 generator.generate(dingle, './exports');
 ```
+  
+## Methods
 
-## Dependancies
+The following methods are supported:
 
-Once the exported classes have been put into XCode you will need the following frameworks:
-
-  * [Alamofire](https://github.com/Alamofire/Alamofire)
-  * [SwiftyJSON](https://github.com/SwiftyJSON/SwiftyJSON)
+  * POST
+  * GET
+  * PUT
+  * DELETE
+  * OPTIONS
+  * HEAD
+  * PATCH
+  * TRACE
+  * CONNECT
