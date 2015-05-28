@@ -1,6 +1,6 @@
 {
   "name": "dingle-swift-alamofire",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Swift Alamofire Generator for Dingle",
   "main": "index.js",
   "scripts": {
