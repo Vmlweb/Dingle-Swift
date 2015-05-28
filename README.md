@@ -1,5 +1,5 @@
 # Dingle Swift Alamofire
-Dingle Swift Alamofire is a client code generator
+Swift Alamofire Generator for [Dingle](https://github.com/Vmlweb/Dingle)
 
 ## Installation
 
@@ -7,17 +7,37 @@ Dingle Swift Alamofire is a client code generator
 $ npm install --save dingle-swift-alamofire
 ```
 
+## Methods
+
+  * POST
+  * GET
+  * PUT
+  * DELETE
+  * OPTIONS
+  * HEAD
+  * PATCH
+  * TRACE
+  * CONNECT
+
 ## Usage
 
-To start generate the swift files use the generate function of dingle:
+Simply require the dingle generator module and specify the directory to build into:
 
 ```javascript
 var dingle = require('dingle')({
-	http_listen: '0.0.0.0',
-	https_listen: '0.0.0.0',
-	tcp_listen: '0.0.0.0',
-	udp_listen: '0.0.0.0'
+    http_listen: '0.0.0.0',
+    https_listen: '0.0.0.0',
+    tcp_listen: '0.0.0.0',
+    udp_listen: '0.0.0.0'
 });
 
-dingle.generate('dingle-swift-alamofire');
+var generator = require('dingle-swift-alamofire');
+generator.generate(dingle, './exports');
 ```
+
+## Dependancies
+
+Once the exported classes have been put into XCode you will need the following frameworks:
+
+  * [Alamofire](https://github.com/Alamofire/Alamofire)
+  * [SwiftyJSON](https://github.com/SwiftyJSON/SwiftyJSON)

@@ -1,11 +1,32 @@
 var fs = require('fs');
 var path = require('path');
 var mkdirp = require('mkdirp');
+var val = require('validator');
 
-module.exports.methods = [ "GET", "PUT", "DELETE", "POST" ];
+//Generate
+module.exports.methods = [ "OPTIONS", "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "TRACE", "CONNECT" ];
+module.exports.generate = function(dingle, directory){
+	directory = path.join(process.cwd(), directory);
+	
+	//Hostname
+	var hostname = '';
+	if (dingle.config.https.listen != '' && dingle.config.https.hostname != ''){
+		hostname = 'https://' + dingle.config.https.hostname + ':' + dingle.config.https.port + '/';
+	}else if (dingle.config.http.listen != '' && dingle.config.http.hostname != '' ){
+		hostname = 'http://' + dingle.config.http.hostname + ':' + dingle.config.http.port + '/';
+	}else{
+		throw "HTTP and HTTPS are not listening or do not have a hostname";
+	}
+	
+	//Generate
+	setup(dingle, directory);
+	for (func in dingle.functions){
+		generate(dingle,hostname, dingle.functions[func], directory);
+	}
+}
 
 //Setup
-module.exports.setup = function(config, type, dir, call){
+function setup(dingle, directory){
 	var str = '';
 
 	//Generate File
@@ -13,7 +34,7 @@ module.exports.setup = function(config, type, dir, call){
 	str+= 'import Alamofire\n'
 	str+= 'import SwiftyJSON\n'
 	
-	str+= 'class ' + config.app.prefix + ' {\n'
+	str+= 'class ' + dingle.config.app.prefix + ' {\n'
 	str+= '	class func sendRequest(url: String, method: Alamofire.Method, params: Dictionary<String,String>, callback:(success: Bool, message: String, output: Dictionary<String,AnyObject>)->()) {\n'
 	str+= '		Alamofire.request(method, url, parameters:params).validate(statusCode: 200..<501).validate(contentType: ["application/json"]).responseJSON{(req, res, json, error) in\n'
 	str+= '			if(error != nil) {\n'
@@ -32,30 +53,30 @@ module.exports.setup = function(config, type, dir, call){
 	str+= '	}\n'
 	str+= '}'
 	
-	write(path.join(dir, config.app.prefix + '.swift'), str);
+	write(path.join(directory, dingle.config.app.prefix + '.swift'), str);
 }
 	
 //Each Call
-module.exports.generate = function(config, type, dir, call, hostname){
+function generate(dingle, hostname, func, directory){
 	var str = '';
 	
 	//Params
 	var methodParam = ""
 	var reqParam = ""
-	for (var param in call.module.params){
-		var obj = call.module.params[param];
+	for (var param in func.params){
+		var obj = func.params[param];
 		
 		//Compare
-		var kind = '';
-		if (obj.validate.toString() == type.bool.toString()){
-			kind = 'Bool';
-		}else if (obj.validate.toString() == type.int.toString()){
-			kind = 'Int';
-		}else if (obj.validate.toString() == type.float.toString()){
-			kind = 'Double';
-		}else{
-			kind = 'String';
-		}
+		var kind = 'String';
+		try{
+			if (val.isBoolean(obj.validator('true'))){ kind = 'Bool'; }
+		}catch(error){ }
+		try{
+			if (val.isInt(obj.validator('123'))){ kind = 'Int'; }
+		}catch(error){ }
+		try{
+			if (val.isFloat(obj.validator('123.123'))){ kind = 'Double'; }
+		}catch(error){ }
 		
 		//Optional
 		var optional = '';
@@ -73,19 +94,32 @@ module.exports.generate = function(config, type, dir, call, hostname){
 	if (reqParam == ''){
 		reqParam = ':';
 	}
+	
+	//Choose method
+	var method = '';
+	for (meth in func.methods){
+		var meth = func.methods[meth];
+		if (module.exports.methods.indexOf(meth) != -1){
+			method = meth;
+			break;
+		}
+	}
+	if (method == ''){
+		return;
+	}
 
 	//Generate File	
 	str+= 'import Foundation\n'
 	str+= 'import Alamofire\n'
 	str+= 'import SwiftyJSON\n'
-	str+= 'extension ' + config.app.prefix + '{\n'
-	str+= '	class func ' + call.name + '(' + methodParam + 'callback: (success: Bool, message: String, output: Dictionary<String, AnyObject>)->()){\n'
-	str+= '		self.sendRequest("' + hostname + '", method: .' + call.module.method + ', params: [' + reqParam + '], callback: callback)\n'
+	str+= 'extension ' + dingle.config.app.prefix + '{\n'
+	str+= '	class func ' + func.name + '(' + methodParam + 'callback: (success: Bool, message: String, output: Dictionary<String, AnyObject>)->()){\n'
+	str+= '		self.sendRequest("' + hostname + func.name + '/", method: .' + method + ', params: [' + reqParam + '], callback: callback)\n'
 	str+= '	}\n'
 	str+= '}'
 	
 	//Make directory and file
-	write(path.join(dir, config.app.prefix + '_' + call.name + '.swift'), str);
+	write(path.join(directory, dingle.config.app.prefix + '_' + func.name + '.swift'), str);
 }
 
 //Write File

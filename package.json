@@ -1,6 +1,6 @@
 {
   "name": "dingle-swift-alamofire",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Swift Alamofire Generator for Dingle",
   "main": "index.js",
   "scripts": {
@@ -12,9 +12,28 @@
   },
   "keywords": [
     "dingle",
-    "export",
-    "generator",
     "framework",
+    "module",
+    "api",
+    "layout",
+    "endpoint",
+    "backend",
+    "scalable",
+    "scale",
+    "maintain",
+    "maintainable",
+    "manager",
+    "export",
+    "code",
+    "generation",
+    "generator",
+    "client",
+    "validation",
+    "validator",
+    "validate",
+    "parameter",
+    "argument",
+    "option",
     "swift",
     "alamofire"
   ],
@@ -25,6 +44,7 @@
   },
   "homepage": "https://github.com/Vmlweb/Dingle-Swift-Alamofire#readme",
   "dependencies": {
-    "mkdirp": "^0.5.1"
+    "mkdirp": "^0.5.1",
+    "validator": "^3.40.0"
   }
 }
