@@ -61,38 +61,36 @@ function generate(dingle, hostname, func, directory){
 	var str = '';
 	
 	//Params
-	var methodParam = ""
-	var reqParam = ""
+	var class_method = "";
+	var required_params = [];
+	var notrequired_params = [];
 	for (var param in func.params){
 		var obj = func.params[param];
 		
 		//Compare
 		var kind = 'String';
 		try{
-			if (val.isBoolean(obj.validator('true'))){ kind = 'Bool'; }
+			if (obj.validator('true') === true){ kind = 'Bool'; }
 		}catch(error){ }
 		try{
-			if (val.isInt(obj.validator('123'))){ kind = 'Int'; }
+			if (obj.validator('123') === 123){ kind = 'Int'; }
 		}catch(error){ }
 		try{
-			if (val.isFloat(obj.validator('123.123'))){ kind = 'Double'; }
+			if (obj.validator('123.123') === 123.123){ kind = 'Double'; }
 		}catch(error){ }
 		
 		//Optional
-		var optional = '';
 		if (!obj.required){
-			optional = '?';
-		}
+			
+			//Construct
+			class_method += param + ': ' + kind  + '?,'
+			notrequired_params.push(param);
+		}else{
 		
-		//Construct
-		methodParam += param + ': ' + kind + optional + ','
-		reqParam += '"' + param + '": "\\(' + param + ')",'
-	}
-	reqParam = reqParam.slice(0,-1);
-	
-	//No params
-	if (reqParam == ''){
-		reqParam = ':';
+			//Construct
+			class_method += param + ': ' + kind + ','
+			required_params.push(param);
+		}
 	}
 	
 	//Choose method
@@ -113,8 +111,19 @@ function generate(dingle, hostname, func, directory){
 	str+= 'import Alamofire\n'
 	str+= 'import SwiftyJSON\n'
 	str+= 'extension ' + dingle.config.app.prefix + '{\n'
-	str+= '	class func ' + func.name + '(' + methodParam + 'callback: (success: Bool, message: String, output: Dictionary<String, AnyObject>)->()){\n'
-	str+= '		self.sendRequest("' + hostname + func.name + '/", method: .' + method + ', params: [' + reqParam + '], callback: callback)\n'
+	str+= '	class func ' + func.name + '(' + class_method + 'callback: (success: Bool, message: String, output: Dictionary<String, AnyObject>)->()){\n'
+	str+= '		var params = Dictionary<String, String>()\n'
+	for (param in required_params){
+		param = required_params[param];
+		str+= '		params["' + param + '"] = "\\(' + param + ')"\n';
+	}
+	for (param in notrequired_params){
+		param = notrequired_params[param];
+		str+= '		if let param = ' + param + '{\n';
+		str+= '			params["' + param + '"] = "\\(param)"\n';
+		str+= '		}\n';
+	}
+	str+= '		self.sendRequest("' + hostname + func.name + '/", method: .' + method + ', params: params, callback: callback)\n'
 	str+= '	}\n'
 	str+= '}'
 	

@@ -9,7 +9,7 @@ $ npm install --save dingle-swift-alamofire
 
 ## Dependancies
 
-Once the exported classes have been put into XCode you will need the following frameworks:
+You will need the following frameworks in your XCode proect:
 
   * [Alamofire](https://github.com/Alamofire/Alamofire)
   * [SwiftyJSON](https://github.com/SwiftyJSON/SwiftyJSON)
@@ -29,12 +29,22 @@ var dingle = require('dingle')({
 var generator = require('dingle-swift-alamofire');
 generator.generate(dingle, './exports');
 ```
-  
+
+Once the files are generated into the specified directory simply drop them into your XCode project and execute like so:
+
+```swift
+MYAPP.users_forgot_username("admin@myawesomeapi.com", password: "myawesomepassword") { (success, message, output) -> () in
+	print(success);
+	print(message);
+	print(output);
+}
+```
+ 
 ## Methods
 
 The following methods are supported:
 
-  * POST
+  * POST (Does not support file upload/downloads)
   * GET
   * PUT
   * DELETE
