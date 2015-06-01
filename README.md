@@ -1,5 +1,5 @@
-# Dingle Swift Alamofire
-Swift Alamofire Generator for [Dingle](https://github.com/Vmlweb/Dingle)
+# Dingle Swift
+[Dingle](https://github.com/Vmlweb/Dingle) Generator for Swift
 
 ## Installation
 
