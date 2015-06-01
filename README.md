@@ -4,7 +4,7 @@
 ## Installation
 
 ```bash
-$ npm install --save dingle-swift-alamofire
+$ npm install --save dingle-swift
 ```
 
 ## Dependancies
@@ -26,7 +26,7 @@ var dingle = require('dingle')({
     udp_listen: '0.0.0.0'
 });
 
-var generator = require('dingle-swift-alamofire');
+var generator = require('dingle-swift');
 generator.generate(dingle, './exports');
 ```
 
