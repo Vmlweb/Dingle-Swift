@@ -1,6 +1,6 @@
 {
   "name": "dingle-swift",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Dingle Generator for Swift",
   "main": "index.js",
   "scripts": {
