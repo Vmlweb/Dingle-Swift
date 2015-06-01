@@ -1,14 +1,14 @@
 {
-  "name": "dingle-swift-alamofire",
-  "version": "0.1.2",
-  "description": "Swift Alamofire Generator for Dingle",
+  "name": "dingle-swift",
+  "version": "0.2.0",
+  "description": "Dingle Generator for Swift",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Vmlweb/Dingle-Swift-Alamofire.git"
+    "url": "git+https://github.com/Vmlweb/Dingle-Swift.git"
   },
   "keywords": [
     "dingle",
@@ -40,9 +40,9 @@
   "author": "Vmlweb <admin@vmlweb.co.uk>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Vmlweb/Dingle-Swift-Alamofire/issues"
+    "url": "https://github.com/Vmlweb/Dingle-Swift/issues"
   },
-  "homepage": "https://github.com/Vmlweb/Dingle-Swift-Alamofire#readme",
+  "homepage": "https://github.com/Vmlweb/Dingle-Swift#readme",
   "dependencies": {
     "mkdirp": "^0.5.1",
     "validator": "^3.40.0"
