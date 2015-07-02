@@ -2,137 +2,41 @@ var fs = require('fs');
 var path = require('path');
 var mkdirp = require('mkdirp');
 var val = require('validator');
+var replace = require("replaceall");
 
 //Generate
-module.exports.methods = [ "OPTIONS", "GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "TRACE", "CONNECT" ];
-module.exports.generate = function(dingle, directory){
+exports.generate = function(dingle,  directory){
 	directory = path.join(process.cwd(), directory);
 	
 	//Hostname
-	var hostname = '';
+	var hostnames = '';
 	if (dingle.config.https.listen != '' && dingle.config.https.hostname != ''){
-		hostname = 'https://' + dingle.config.https.hostname + ':' + dingle.config.https.port + '/';
-	}else if (dingle.config.http.listen != '' && dingle.config.http.hostname != '' ){
-		hostname = 'http://' + dingle.config.http.hostname + ':' + dingle.config.http.port + '/';
-	}else{
-		throw "HTTP and HTTPS are not listening or do not have a hostname";
+		hostnames += 'hostnames["https"] = "' + dingle.config.https.hostname + ':' + dingle.config.https.port + '"\n';
+	}
+	if (dingle.config.http.listen != '' && dingle.config.http.hostname != '' ){
+		hostnames += 'hostnames["http"] = "' + dingle.config.http.hostname + ':' + dingle.config.http.port + '"\n';
+	}
+	if (dingle.config.tcp.listen != '' && dingle.config.tcp.hostname != '' ){
+		hostnames += 'hostnames["tcp"] = "' + dingle.config.tcp.hostname + ':' + dingle.config.tcp.port + '"\n';
+	}
+	if (dingle.config.udp.listen != '' && dingle.config.udp.hostname != '' ){
+		hostnames += 'hostnames["udp"] = "' + dingle.config.udp.hostname + ':' + dingle.config.udp.port + '"\n';
 	}
 	
 	//Generate
-	setup(dingle, directory);
+	var functions = '';
 	for (func in dingle.functions){
-		generate(dingle,hostname, dingle.functions[func], directory);
-	}
-}
-
-//Setup
-function setup(dingle, directory){
-	var str = '';
-
-	//Generate File
-	str+= 'import Foundation\n'
-	str+= 'import Alamofire\n'
-	str+= 'import SwiftyJSON\n'
-	
-	str+= 'class ' + dingle.config.app.prefix + ' {\n'
-	str+= '	class func sendRequest(url: String, method: Alamofire.Method, params: Dictionary<String,String>, callback:(success: Bool, message: String, output: Dictionary<String,AnyObject>)->()) {\n'
-	str+= '		Alamofire.request(method, url, parameters:params).validate(statusCode: 200..<501).validate(contentType: ["application/json"]).responseJSON{(req, res, json, error) in\n'
-	str+= '			if(error != nil) {\n'
-	str+= '				if error?.code == -1 || error?.code == -1005{\n';
-	str+= '					callback(success: false, message:"Could not reach server, please check your internet connection", output: [:])\n'
-	str+= '				}else if error?.code == -1202{\n';
-	str+= '					callback(success: false, message:"A valid SSL certificate could not be found on the server", output: [:])\n'
-	str+= '				}else{\n'
-	str+= '					callback(success: false, message: error!.localizedDescription, output: [:])\n'
-	str+= '				}\n'
-	str+= '			}else {\n'
-	str+= '				var json = JSON(json!)\n'
-	str+= '				callback(success: json["success"].boolValue, message: json["message"].stringValue, output: json["output"].dictionaryObject!)\n'
-	str+= '			}\n'
-	str+= '		}\n'
-	str+= '	}\n'
-	str+= '}'
-	
-	write(path.join(directory, dingle.config.app.prefix + '.swift'), str);
-}
-	
-//Each Call
-function generate(dingle, hostname, func, directory){
-	var str = '';
-	
-	//Params
-	var class_method = "";
-	var required_params = [];
-	var notrequired_params = [];
-	for (var param in func.params){
-		var obj = func.params[param];
-		
-		//Compare
-		var kind = 'String';
-		try{
-			if (obj.validator('true') === true){ kind = 'Bool'; }
-		}catch(error){ }
-		try{
-			if (obj.validator('123') === 123){ kind = 'Int'; }
-		}catch(error){ }
-		try{
-			if (obj.validator('123.123') === 123.123){ kind = 'Double'; }
-		}catch(error){ }
-		
-		//Optional
-		if (!obj.required){
-			
-			//Construct
-			class_method += param + ': ' + kind  + '?,'
-			notrequired_params.push(param);
-		}else{
-		
-			//Construct
-			class_method += param + ': ' + kind + ','
-			required_params.push(param);
-		}
+		functions += generate(dingle.functions[func]) + '';
 	}
 	
-	//Choose method
-	var method = '';
-	for (meth in func.methods){
-		var meth = func.methods[meth];
-		if (module.exports.methods.indexOf(meth) != -1){
-			method = meth;
-			break;
-		}
-	}
-	if (method == ''){
-		return;
-	}
-
-	//Generate File	
-	str+= 'import Foundation\n'
-	str+= 'import Alamofire\n'
-	str+= 'import SwiftyJSON\n'
-	str+= 'extension ' + dingle.config.app.prefix + '{\n'
-	str+= '	class func ' + func.name + '(' + class_method + 'callback: (success: Bool, message: String, output: Dictionary<String, AnyObject>)->()){\n'
-	str+= '		var params = Dictionary<String, String>()\n'
-	for (param in required_params){
-		param = required_params[param];
-		str+= '		params["' + param + '"] = "\\(' + param + ')"\n';
-	}
-	for (param in notrequired_params){
-		param = notrequired_params[param];
-		str+= '		if let param = ' + param + '{\n';
-		str+= '			params["' + param + '"] = "\\(param)"\n';
-		str+= '		}\n';
-	}
-	str+= '		self.sendRequest("' + hostname + func.name + '/", method: .' + method + ', params: params, callback: callback)\n'
-	str+= '	}\n'
-	str+= '}'
+	//Make
+	var filename = path.join(directory, dingle.config.app.prefix + '.swift');
+	var contents = fs.readFileSync(path.join(__dirname + '/request.swift')).toString();
+	contents = replace("<class>", dingle.config.app.prefix, contents);
+	contents = replace("<hostnames>", hostnames, contents);
+	contents = replace("<functions>", functions, contents);
 	
-	//Make directory and file
-	write(path.join(directory, dingle.config.app.prefix + '_' + func.name + '.swift'), str);
-}
-
-//Write File
-function write(filename, contents){
+	//Write file
 	mkdirp(path.dirname(filename), function (error) {
 		if (error){
 			throw error;
@@ -146,4 +50,81 @@ function write(filename, contents){
 			});
 		}
 	});
+}
+
+//Each Call
+function generate(func){
+	
+	//Parameters
+	var param_method = [];
+	var param_calling = [];
+	for(var key in func.params) {
+		var obj = func.params[key];
+		
+		//Compare
+		var kind = 'String';
+		try{
+			if (obj.validator('true') === true){ kind = 'Bool'; }
+		}catch(error){ }
+		try{
+			if (obj.validator('123') === 123){ kind = 'Int'; }
+		}catch(error){ }
+		try{
+			if (obj.validator('123.123') === 123.123){ kind = 'Double'; }
+		}catch(error){ }
+		var file = { path: '/test/', size: 1 }
+		try{
+			if (obj.validator(file) === file){ kind = 'NSURL'; }
+		}catch(error){ }
+		
+		//Calling
+		if (param_calling.length == 0){
+			param_calling.push(key);
+		}else{
+			param_calling.push(key + ': ' + key);
+		}
+		
+		//Optional
+		if (!obj.required){
+			param_method.push(key + ': ' + kind  + '?');
+		}else{
+			param_method.push(key + ': ' + kind);
+		}
+	}
+	
+	//Parameters
+	var method_values = [];
+	for(var key in func.methods) { method_values.push(func.methods[key]); }
+	
+	//Generate
+	var str = 'func ' + func.name + '(' + param_method.join(', ') + ', callback: (success: Bool, message: String, output: JSON?)->()){\n';
+	str += '		' + func.name + '(' + param_calling.join(', ') + ', methods: [ "' + method_values.join('", "') + '" ], callback: callback, uploading: nil, downloading: nil, stream: nil)\n';
+	str += '	}\n';
+	str += '	func ' + func.name + '(' + param_method.join(', ') + ', methods: Array<String>, callback: (success: Bool, message: String, output: JSON?)->()){\n';
+	str += '		' + func.name + '(' + param_calling.join(', ') + ', methods: methods, callback: callback, uploading: nil, downloading: nil, stream: nil)\n';
+	str += '	}\n';
+	str += '	func ' + func.name + '(' + param_method.join(', ') + ',\n';
+	str += '		methods: Array<String>,\n';
+	str += '		callback: (success: Bool, message: String, output: JSON?)->(),\n';
+	str += '		uploading: ((size: Double, remaining: Double, percentage: Double)->Void)?,\n';
+	str += '		downloading: ((size: Double, remaining: Double, percentage: Double)->Void)?, stream: NSOutputStream?){\n';
+	str += '\n';
+	str += '		//Parameters\n';
+	str += '		var params = [String : AnyObject]()\n';
+	for(var key in func.params) {
+		var obj = func.params[key];
+		if (!obj.required){
+	str += '		if let value = ' + key + '{\n';
+	str += '			params["' + key + '"] = value\n';
+	str += '		}\n';
+		}else{
+	str += '		params["' + key + '"] = ' + key + '\n';
+		}
+	}
+	str += '\n';
+	str += '		//Execute\n';
+	str += '		sendRequest("' + func.name + '", methods: methods, params: params, callback: callback, uploading: uploading, downloading: downloading, stream: stream)\n';
+	str += '	}\n';
+	
+	return str;
 }

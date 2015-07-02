@@ -1,6 +1,6 @@
 {
   "name": "dingle-swift",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Dingle Generator for Swift",
   "main": "index.js",
   "scripts": {
@@ -34,8 +34,8 @@
     "parameter",
     "argument",
     "option",
-    "swift",
-    "alamofire"
+    "javascript",
+    "swift"
   ],
   "author": "Vmlweb <admin@vmlweb.co.uk>",
   "license": "MIT",
@@ -45,6 +45,7 @@
   "homepage": "https://github.com/Vmlweb/Dingle-Swift#readme",
   "dependencies": {
     "mkdirp": "^0.5.1",
+    "replaceall": "^0.1.6",
     "validator": "^3.40.0"
   }
 }
