@@ -75,7 +75,7 @@ To upload a file simply specify a NSURL as a parameter as shown below:
 ```javascript
 var myapi = MYAPI();
 
-myapi.upload_file(NSURL(fileURLWithPath: "/Users/Me/Downloads/file.dump"), methods: [ "HTTPS", "HTTP" ], callback: { (success, message, output) -> () in
+myapi.upload_file(NSURL(fileURLWithPath: "/Users/Me/Downloads/file.dump"), methods: [ "POST", "GET" ], callback: { (success, message, output) -> () in
 	println(success)
 	println(message)
 	println(output)
@@ -93,7 +93,7 @@ When downloading a file you must specify a NSOutputStream to write to and once t
 ```javascript
 var myapi = MYAPI();
 
-myapi.download_file("admin@myawesomeapi.com", methods: [ "HTTPS", "HTTP" ], callback: { (success, message, output) -> () in
+myapi.download_file("admin@myawesomeapi.com", methods: [ "POST", "GET" ], callback: { (success, message, output) -> () in
 	println(success)
 	println(message)
 	println(output)

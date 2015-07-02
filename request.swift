@@ -130,12 +130,18 @@ class <class> : NSObject, GCDAsyncSocketDelegate, GCDAsyncUdpSocketDelegate{
 						callback(success: success, message: message, output: json["output"])
 					
 					}else{
-						callback(success: false, message: "Invalid JSON? response", output: nil)
+						callback(success: false, message: "Invalid JSON response", output: nil)
 					}
 				}
 			}
 		}, failure: { (request, error) -> Void in
-			callback(success: false, message: error.localizedDescription, output: nil)
+			if error.code == -1009{
+				callback(success: false, message: "Could not find server, please check your internet connection", output: nil)
+			}else if error.code == -1004{
+				callback(success: false, message: "Could not connect to server, please contact administrator", output: nil)
+			}else{
+				callback(success: false, message: error.localizedDescription, output: nil)
+			}
 		})
 		
 		//Downloading
@@ -212,7 +218,7 @@ class <class> : NSObject, GCDAsyncSocketDelegate, GCDAsyncUdpSocketDelegate{
 	}
 	func tcpTimeout(){
 		if let callback = tcpCallback{
-			callback(success: false, message: "Could not find the server, please check your internet connection", output: nil)
+			callback(success: false, message: "Could not find server, please check your internet connection", output: nil)
 			tcpClose()
 		}
 	}
@@ -220,6 +226,18 @@ class <class> : NSObject, GCDAsyncSocketDelegate, GCDAsyncUdpSocketDelegate{
 		tcpSocket.disconnect()
 		tcpSocket = nil
 		tcpCallback = nil
+	}
+	func socketDidDisconnect(sock: GCDAsyncSocket!, withError err: NSError!) {
+		if let callback = tcpCallback{
+			if err.code == 8{
+				callback(success: false, message: "Could not find server, please check your internet connection", output: nil)
+			}else if err.code == 61{
+				callback(success: false, message: "Could not connect to server, please contact administrator", output: nil)
+			}else{
+				callback(success: false, message: err.localizedDescription, output: nil)
+			}
+			tcpClose()
+		}
 	}
 	func socket(sock: GCDAsyncSocket!, didReadData data: NSData!, withTag tag: Int) {
 		if let callback = tcpCallback{
@@ -235,7 +253,7 @@ class <class> : NSObject, GCDAsyncSocketDelegate, GCDAsyncUdpSocketDelegate{
 				tcpClose()
 				
 			}else{
-				callback(success: false, message: "Invalid JSON? response", output: nil)
+				callback(success: false, message: "Invalid JSON response", output: nil)
 				tcpClose()
 			}
 		}
@@ -294,7 +312,7 @@ class <class> : NSObject, GCDAsyncSocketDelegate, GCDAsyncUdpSocketDelegate{
 	}
 	func udpTimeout(){
 		if let callback = udpCallback{
-			callback(success: false, message: "Could not find the server, please check your internet connection", output: nil)
+			callback(success: false, message: "Could not connect to server, please contact administrator", output: nil)
 			udpClose()
 		}
 	}
@@ -305,7 +323,11 @@ class <class> : NSObject, GCDAsyncSocketDelegate, GCDAsyncUdpSocketDelegate{
 	}
 	func udpSocket(sock: GCDAsyncUdpSocket!, didNotConnect error: NSError!) {
 		if let callback = udpCallback{
-			callback(success: false, message: error.localizedDescription, output: nil)
+			if error.code == 8{
+				callback(success: false, message: "Could not find server, please check your internet connection", output: nil)
+			}else{
+				callback(success: false, message: error.localizedDescription, output: nil)
+			}
 			udpClose()
 		}
 	}
@@ -329,7 +351,7 @@ class <class> : NSObject, GCDAsyncSocketDelegate, GCDAsyncUdpSocketDelegate{
 				udpClose()
 				
 			}else{
-				callback(success: false, message: "Invalid JSON? response", output: nil)
+				callback(success: false, message: "Invalid JSON response", output: nil)
 				udpClose()
 			}
 		}
