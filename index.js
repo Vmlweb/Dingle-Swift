@@ -97,12 +97,15 @@ function generate(func){
 	for(var key in func.methods) { method_values.push(func.methods[key]); }
 	
 	//Generate
-	var str = 'func ' + func.name + '(' + param_method.join(', ') + ', callback: (success: Bool, message: String, output: JSON?)->()){\n';
+	var str = '/**' + func.description + '*/\n';
+	str += '	func ' + func.name + '(' + param_method.join(', ') + ', callback: (success: Bool, message: String, output: JSON?)->()){\n';
 	str += '		' + func.name + '(' + param_calling.join(', ') + ', methods: [ "' + method_values.join('", "') + '" ], callback: callback, uploading: nil, downloading: nil, stream: nil)\n';
 	str += '	}\n';
+	str += '	/**' + func.description + '*/\n';
 	str += '	func ' + func.name + '(' + param_method.join(', ') + ', methods: Array<String>, callback: (success: Bool, message: String, output: JSON?)->()){\n';
 	str += '		' + func.name + '(' + param_calling.join(', ') + ', methods: methods, callback: callback, uploading: nil, downloading: nil, stream: nil)\n';
 	str += '	}\n';
+	str += '	/**' + func.description + '*/\n';
 	str += '	func ' + func.name + '(' + param_method.join(', ') + ',\n';
 	str += '		methods: Array<String>,\n';
 	str += '		callback: (success: Bool, message: String, output: JSON?)->(),\n';
