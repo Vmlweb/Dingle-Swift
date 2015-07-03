@@ -382,5 +382,5 @@ class <class> : NSObject, GCDAsyncSocketDelegate, GCDAsyncUdpSocketDelegate{
 		sendRequest("_NAME_", methods: [ "_METHODS_" ], params: params, callback: callback, uploading: uploading, downloading: downloading, stream: stream)
 	}
 	*/
-	<functions>
+<functions>
 }
