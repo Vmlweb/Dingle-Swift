@@ -99,6 +99,7 @@ class <class> : NSObject, GCDAsyncSocketDelegate, GCDAsyncUdpSocketDelegate{
 			
 		//Make Operation
 		var operation = AFHTTPRequestOperation(request: request)
+		operation.securityPolicy.allowInvalidCertificates = true
 		if let stream = stream{
 			operation.outputStream = stream
 		}
