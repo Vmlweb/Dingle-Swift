@@ -83,14 +83,20 @@ class <class> : NSObject, GCDAsyncSocketDelegate, GCDAsyncUdpSocketDelegate{
 		}
 			
 		//Make request
-		var request = serializer.multipartFormRequestWithMethod(method, URLString: hostname + name + "/", parameters: strings, constructingBodyWithBlock: { (form) -> Void in
-			//Add files
-			for (key, value) in files{
-				if let file = value{
-					form.appendPartWithFileURL(file, name: key, error: &error)
+		var url = hostname + name + "/"
+		var request : NSMutableURLRequest
+		if method == "POST"{
+			request = serializer.multipartFormRequestWithMethod(method, URLString: url, parameters: strings, constructingBodyWithBlock: { (form) -> Void in
+				//Add files
+				for (key, value) in files{
+					if let file = value{
+						form.appendPartWithFileURL(file, name: key, error: &error)
+					}
 				}
-			}
-		}, error: &error)
+			}, error: &error)
+		}else{
+			request = serializer.requestWithMethod(method, URLString: url, parameters: strings, error: &error)
+		}
 			
 		//Error
 		if let error = error{
