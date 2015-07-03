@@ -92,21 +92,29 @@ function generate(func){
 		}
 	}
 	
+	//Join
+	if (param_method.length != 0){
+		param_method = param_method.join(', ') + ',';
+	}
+	if (param_calling.length != 0){
+		param_calling = param_calling.join(', ') + ',';
+	}
+	
 	//Parameters
 	var method_values = [];
 	for(var key in func.methods) { method_values.push(func.methods[key]); }
 	
 	//Generate
-	var str = '/**' + func.description + '*/\n';
-	str += '	func ' + func.name + '(' + param_method.join(', ') + ', callback: (success: Bool, message: String, output: JSON?)->()){\n';
-	str += '		' + func.name + '(' + param_calling.join(', ') + ', methods: [ "' + method_values.join('", "') + '" ], callback: callback, uploading: nil, downloading: nil, stream: nil)\n';
+	var str = '	/**' + func.description + '*/\n';
+	str += '	func ' + func.name + '(' + param_method + ', callback: (success: Bool, message: String, output: JSON?)->()){\n';
+	str += '		' + func.name + '(' + param_calling + ', methods: [ "' + method_values.join('", "') + '" ], callback: callback, uploading: nil, downloading: nil, stream: nil)\n';
 	str += '	}\n';
 	str += '	/**' + func.description + '*/\n';
-	str += '	func ' + func.name + '(' + param_method.join(', ') + ', methods: Array<String>, callback: (success: Bool, message: String, output: JSON?)->()){\n';
-	str += '		' + func.name + '(' + param_calling.join(', ') + ', methods: methods, callback: callback, uploading: nil, downloading: nil, stream: nil)\n';
+	str += '	func ' + func.name + '(' + param_method + ', methods: Array<String>, callback: (success: Bool, message: String, output: JSON?)->()){\n';
+	str += '		' + func.name + '(' + param_calling + ', methods: methods, callback: callback, uploading: nil, downloading: nil, stream: nil)\n';
 	str += '	}\n';
 	str += '	/**' + func.description + '*/\n';
-	str += '	func ' + func.name + '(' + param_method.join(', ') + ',\n';
+	str += '	func ' + func.name + '(' + param_method + ',\n';
 	str += '		methods: Array<String>,\n';
 	str += '		callback: (success: Bool, message: String, output: JSON?)->(),\n';
 	str += '		uploading: ((size: Double, remaining: Double, percentage: Double)->Void)?,\n';
