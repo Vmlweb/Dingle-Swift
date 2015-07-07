@@ -47,7 +47,15 @@ class <class> : NSObject, GCDAsyncSocketDelegate, GCDAsyncUdpSocketDelegate{
 			
 	}
 	
+	//Cancel
+	func cancelAll(){
+		httpManager.operationQueue.cancelAllOperations()
+		tcpClose()
+		udpClose()
+	}
+	
 	//HTTP
+	var httpManager = AFURLSessionManager(sessionConfiguration: NSURLSessionConfiguration.defaultSessionConfiguration())
 	func dingleHTTP(name: String, method: String, params: [String : AnyObject],
 		callback: (success: Bool, message: String, output: JSON?)->(),
 		uploading: ((size: Double, remaining: Double, percentage: Double)->Void)?,
@@ -55,7 +63,6 @@ class <class> : NSObject, GCDAsyncSocketDelegate, GCDAsyncUdpSocketDelegate{
 	
 		//Setup
 		var serializer = AFHTTPRequestSerializer()
-		var manager = AFURLSessionManager(sessionConfiguration: NSURLSessionConfiguration.defaultSessionConfiguration())
 		var error: NSError? = nil
 		
 		//Check Params
