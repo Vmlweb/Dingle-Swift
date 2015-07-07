@@ -237,7 +237,9 @@ class <class> : NSObject, GCDAsyncSocketDelegate, GCDAsyncUdpSocketDelegate{
 		}
 	}
 	func tcpClose(){
-		tcpSocket.disconnect()
+		if let socket = tcpSocket{
+			socket.disconnect()
+		}
 		tcpSocket = nil
 		tcpCallback = nil
 	}
@@ -331,7 +333,9 @@ class <class> : NSObject, GCDAsyncSocketDelegate, GCDAsyncUdpSocketDelegate{
 		}
 	}
 	func udpClose(){
-		udpSocket.close()
+		if let socket = udpSocket{
+			socket.close()
+		}
 		udpSocket = nil
 		udpCallback = nil
 	}
